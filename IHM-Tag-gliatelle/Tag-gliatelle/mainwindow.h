@@ -17,6 +17,7 @@
 #include <QModelIndex>
 #include <QFileInfo>
 #include <QTabWidget>
+#include <QListWidget>
 
 
 class MainWindow : public QMainWindow
@@ -52,7 +53,16 @@ class TabDroit : public QWidget{
     Q_OBJECT
 public:
     TabDroit(QWidget *parent = 0);
+
 private:
+    QModelIndex index;
+    QStringListModel *model;
+    QListView *vue;
+    QStringList list;
+    QLabel *name = new QLabel("");
+
+private slots:
+    void afficher();
 };
 
 #endif // MAINWINDOW_H
