@@ -56,6 +56,7 @@ private:
 private slots:
     void afficher();
     void ajouterTag();
+    void creerTag();
     void supprimerTag();
 };
 
@@ -81,8 +82,10 @@ private:
     QListView *vue2;
     QStringList list2;
 
-    QLineEdit *recherche;
+    QStringList l;
 
+    QLineEdit *recherche;
+    void majTagsDispo();
 private slots:
     void afficher();
     void ajouterTag();

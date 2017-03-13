@@ -14,9 +14,6 @@ TabDroit::TabDroit(QWidget *parent)
     QPushButton *rechercher = new QPushButton("Rechercher");
 
     model = new QStringListModel;
-
-    list.push_back("/home/etochy/");
-    list.push_back("fichier 2");
     model->setStringList(list);
 
     vue = new QListView;
@@ -83,14 +80,82 @@ void TabDroit::afficher(){
     index = vue->currentIndex();
     fichierCourant = list.at(index.row());
 
-    name->setText(fichierCourant);
-    //afficher tag dans vue1
+    name->setText("Fichier : "+fichierCourant);
+
+    QString fileName = "/home/etochy/tagFichier.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+    list1.clear();
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        QStringList l = ligne.split(";");
+        QString str1 = l.at(0);
+        if(fichierCourant == str1){
+            for(int i=1; i<l.size();++i){
+                list1.push_back(l.at(i));
+            }
+            model1->removeRows( 0, model1->rowCount() );
+        }
+    }
+    model1->setStringList(list1);
+    fichier.close();
+
+    majTagsDispo();
 }
 void TabDroit::ajouterTag(){
     index = vue2->currentIndex();
     QString st = list2.at(index.row());
 
     //ajouter tag st
+
+    QStringList listTags;
+    QString fileName = "/home/etochy/tagFichier.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        listTags.push_back(ligne);
+    }
+    fichier.close();
+    // On ouvre notre fichier en lecture seule et on vérifie l'ouverture
+    if (!fichier.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    // Création d'un objet QTextStream à partir de notre objet QFile
+    QTextStream flux2(&fichier);
+    // On choisit le codec correspondant au jeu de caractère que l'on souhaite ; ici, UTF-8
+    flux2.setCodec("UTF-8");
+    // Écriture des différentes lignes dans le fichier
+    int b = 0;
+    for(int i=0; i<listTags.size();++i){
+        l.clear();
+        QStringList l2 = listTags.at(i).split(";");
+        QString str1 = l2.at(0);
+
+        if(fichierCourant == str1){
+            flux << listTags.at(i) << ";" << st << endl;
+            b = 1;
+            l = listTags.at(i).split(";");
+        }
+        else{
+            flux2 << listTags.at(i) << endl;
+        }
+    }
+    if(b == 0){
+        flux2 << fichierCourant << ";" << st << endl;
+    }
+    fichier.close();
+    qWarning("avant afficher");
+    afficher();
+    qWarning("apres afficher");
+
 }
 void TabDroit::supprimerTag(){
     index = vue1->currentIndex();
@@ -101,14 +166,48 @@ void TabDroit::supprimerTag(){
 void TabDroit::rechercher(){
     QString st = recherche->text();
 
-    //rechercher correspondance
+    //rechercher correspondance*
+    QString fileName = "/home/etochy/tagFichier.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+    list.clear();
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        QStringList l = ligne.split(";");
+
+        if(ligne.contains(st)){
+            list.push_back(l.at(0));
+        }
+    }
+    model->setStringList(list);
+    fichier.close();
 }
 
 void TabDroit::ouvrir(){
     if(fichierCourant == ""){
-        QMessageBox::information(this, "Erreur", "Aucun fichier n'a été séléctionné");
+        QMessageBox::critical(this, "Erreur", "Aucun fichier n'a été séléctionné");
     }
     else{
         QDesktopServices::openUrl(fichierCourant);
     }
+}
+void TabDroit::majTagsDispo(){
+    qWarning("maj");
+    QString fileName = "/home/etochy/tags.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+    list2.clear();
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        list2.push_back(ligne);
+    }
+    model2->setStringList(list2);
+    fichier.close();
+
 }

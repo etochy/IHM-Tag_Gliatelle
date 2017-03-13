@@ -26,8 +26,12 @@ TabGauche::TabGauche(QWidget *parent)
     QPushButton *rech = new QPushButton("Rechercher");
 
     QPushButton *ajouterTag = new QPushButton("Ajouter Tag");
+    QPushButton *creerTag = new QPushButton("Creer Tag");
     QPushButton *supprTag = new QPushButton("Supprimer Tag");
 
+    QHBoxLayout *tags = new QHBoxLayout;
+    tags->addWidget(ajouterTag);
+    tags->addWidget(creerTag);
     model1 = new QStringListModel;
     model1->setStringList(list1);
     vue1 = new QListView;
@@ -44,7 +48,7 @@ TabGauche::TabGauche(QWidget *parent)
     layoutDroite->addWidget(vue1);
     layoutDroite->addWidget(supprTag);
     layoutDroite->addWidget(vue2);
-    layoutDroite->addWidget(ajouterTag);
+    layoutDroite->addLayout(tags);
 
     //----------------------------------------------------
 
@@ -52,6 +56,7 @@ TabGauche::TabGauche(QWidget *parent)
     QObject::connect(vue1, SIGNAL(activated(QModelIndex)), this, SLOT(supprimerTag()));
     QObject::connect(supprTag, SIGNAL(clicked(bool)), this, SLOT(supprimerTag()));
     QObject::connect(vue2, SIGNAL(activated(QModelIndex)), this, SLOT(ajouterTag()));
+    QObject::connect(creerTag, SIGNAL(clicked(bool)), this, SLOT(creerTag()));
 
     //----------------------------------------------------
     QHBoxLayout *layoutSecondaire = new QHBoxLayout;
@@ -73,7 +78,6 @@ void TabGauche::afficher(){
     fichierCourant = file.absoluteFilePath();
     name->setText(st);
 
-    //ajouter tag st
     QString fileName = "/home/etochy/tagFichier.txt";
     QFile fichier(fileName);
     fichier.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -131,7 +135,7 @@ void TabGauche::ajouterTag(){
     for(int i=0; i<listTags.size();++i){
         l.clear();
         QStringList l2 = listTags.at(i).split(";");
-        QString str1 = l.at(0);
+        QString str1 = l2.at(0);
         if(fichierCourant == str1){
             flux << listTags.at(i) << ";" << st << endl;
             b = 1;
@@ -145,7 +149,9 @@ void TabGauche::ajouterTag(){
         flux2 << fichierCourant << ";" << st << endl;
     }
     fichier.close();
+
     afficher();
+
 
 }
 void TabGauche::supprimerTag(){
@@ -155,7 +161,48 @@ void TabGauche::supprimerTag(){
     //supprimer tag st de fichier courant
 }
 
+void TabGauche::creerTag(){
+    QString st = QInputDialog::getText(this, "Tag", "Nouveau Tag?");
+    //ajouter tag st
+    int fail = 0;
+    QStringList listTags;
+    QString fileName = "/home/etochy/tags.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        listTags.push_back(ligne);
+        if(ligne == st){
+            fail =1;
+        }
+    }
+    fichier.close();
+    // On ouvre notre fichier en lecture seule et on vérifie l'ouverture
+    if (!fichier.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    // Création d'un objet QTextStream à partir de notre objet QFile
+    QTextStream flux2(&fichier);
+    // On choisit le codec correspondant au jeu de caractère que l'on souhaite ; ici, UTF-8
+    flux2.setCodec("UTF-8");
+    // Écriture des différentes lignes dans le fichier
+    for(int i=0; i<listTags.size();++i){
+        flux2 << listTags.at(i) << endl;
+
+    }
+    if(fail == 0){
+        flux2 << st << endl;
+    }
+    fichier.close();
+    afficher();
+}
+
 void TabGauche::majTagsDispo(){
+    qWarning("maj");
     QString fileName = "/home/etochy/tags.txt";
     QFile fichier(fileName);
     fichier.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -165,16 +212,8 @@ void TabGauche::majTagsDispo(){
     while(! flux.atEnd())
     {
         ligne = flux.readLine();
-        for(int i=1;i<l.size();++i){
-            if(l.at(i) == ligne){
-                //do nothing
-            }
-            else{
-                list2.push_back(ligne);
-            }
-        }
+        list2.push_back(ligne);
     }
-    model2->setStringList( QStringList{} );
     model2->setStringList(list2);
     fichier.close();
 
