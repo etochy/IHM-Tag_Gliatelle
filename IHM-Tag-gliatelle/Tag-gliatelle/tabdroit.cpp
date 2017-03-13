@@ -15,8 +15,8 @@ TabDroit::TabDroit(QWidget *parent)
 
     model = new QStringListModel;
 
-    list.push_back("coucou");
-    list.push_back("encule");
+    list.push_back("fichier 1");
+    list.push_back("fichier 2");
     model->setStringList(list);
 
     vue = new QListView;
@@ -35,10 +35,31 @@ TabDroit::TabDroit(QWidget *parent)
 
     //----------------
     QVBoxLayout *layoutDroit = new QVBoxLayout;
-    QPushButton *addTag = new QPushButton("Ajouter tag");
-    layoutDroit->addWidget(addTag);
-    layoutDroit->addWidget(name);
 
+    model1 = new QStringListModel;
+    list1.push_back("tagPresent1");
+    list1.push_back("tagPresent2");
+    model1->setStringList(list1);
+    vue1 = new QListView;
+    vue1->setModel(model1);
+    vue1->setEditTriggers(0);
+
+    model2 = new QStringListModel;
+    list2.push_back("tagDispo1");
+    list2.push_back("tagDispo2");
+    model2->setStringList(list2);
+    vue2 = new QListView;
+    vue2->setModel(model2);
+    vue2->setEditTriggers(0);
+
+    QPushButton *ajouterTag = new QPushButton("Ajouter Tag");
+    QPushButton *supprTag = new QPushButton("Supprimer Tag");
+
+    layoutDroit->addWidget(name);
+    layoutDroit->addWidget(vue1);
+    layoutDroit->addWidget(supprTag);
+    layoutDroit->addWidget(vue2);
+    layoutDroit->addWidget(ajouterTag);
     //----------------
     layoutPrincipal->addLayout(layoutGauche);
     layoutPrincipal->addLayout(layoutDroit);
@@ -51,5 +72,10 @@ void TabDroit::afficher(){
     QString st = list.at(index.row());
 
     name->setText(st);
+}
+void TabDroit::ajouterTag(){
+
+}
+void TabDroit::supprimerTag(){
 
 }

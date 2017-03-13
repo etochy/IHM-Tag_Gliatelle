@@ -9,6 +9,7 @@
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QAction>
+#include <QtCore>
 
 #include <QLabel>
 
@@ -41,12 +42,22 @@ private:
     QModelIndex index;
     QDirModel *model;
     QTreeView *tree = new QTreeView();
-    //treeView->currentIndex();
 
-    void ajouterTag();
-    void supprimerTag();
+    QStringListModel *model1;
+    QListView *vue1;
+    QStringList list1;
+
+    QStringListModel *model2;
+    QListView *vue2;
+    QStringList list2;
+
+    void readFile(const QJsonObject &json);
+    void addTagFile(QJsonObject &json,QString st);
+
 private slots:
     void afficher();
+    void ajouterTag();
+    void supprimerTag();
 };
 
 class TabDroit : public QWidget{
@@ -61,8 +72,20 @@ private:
     QStringList list;
     QLabel *name = new QLabel("");
 
+    QStringListModel *model1;
+    QListView *vue1;
+    QStringList list1;
+
+    QStringListModel *model2;
+    QListView *vue2;
+    QStringList list2;
+
 private slots:
     void afficher();
+    void ajouterTag();
+    void supprimerTag();
+
+
 };
 
 #endif // MAINWINDOW_H

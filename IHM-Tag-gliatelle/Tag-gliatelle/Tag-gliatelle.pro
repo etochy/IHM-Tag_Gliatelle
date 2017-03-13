@@ -29,3 +29,5 @@ SOURCES += main.cpp\
     tabdroit.cpp
 
 HEADERS  += mainwindow.h
+
+DISTFILES +=

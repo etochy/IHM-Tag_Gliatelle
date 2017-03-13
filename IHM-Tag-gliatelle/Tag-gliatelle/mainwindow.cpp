@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     layoutPrincipal->addWidget(tabWidget);
     zoneCentrale->setLayout(layoutPrincipal);
     setCentralWidget(zoneCentrale);
+    setBaseSize(800,600);
 
 }
 
