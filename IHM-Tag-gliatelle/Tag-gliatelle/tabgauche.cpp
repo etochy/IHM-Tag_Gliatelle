@@ -4,29 +4,6 @@ TabGauche::TabGauche(QWidget *parent)
     : QWidget(parent)
 {
     //---------------------------------------------------
-    /*
-    QFile loadFile(QStringLiteral("/home/etochy/tag.json"));
-
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open save file.");
-    }
-
-    QByteArray saveData = loadFile.readAll();
-
-    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
-
-    read(loadDoc.object());*/
-    //---------------------------------------------------
-    QFile saveFile(QStringLiteral("/home/etochy/tag.json"));
-
-    if (!saveFile.open(QIODevice::ReadWrite)) {
-        qWarning("Couldn't open save file.");
-    }
-
-    QJsonObject gameObject;
-    addTagFile(gameObject,"tg");
-    QJsonDocument saveDoc(gameObject);
-    saveFile.write(saveDoc.toJson());
 
     //---------------------------------------------------
     QVBoxLayout *layoutPrincipal = new QVBoxLayout;
@@ -52,17 +29,12 @@ TabGauche::TabGauche(QWidget *parent)
     QPushButton *supprTag = new QPushButton("Supprimer Tag");
 
     model1 = new QStringListModel;
-    list1.push_back("tagPresent1");
-    list1.push_back("tagPresent2");
     model1->setStringList(list1);
     vue1 = new QListView;
     vue1->setModel(model1);
     vue1->setEditTriggers(0);
 
     model2 = new QStringListModel;
-    list2.push_back("tagDispo1");
-    list2.push_back("tagDispo2");
-    model2->setStringList(list2);
     vue2 = new QListView;
     vue2->setModel(model2);
     vue2->setEditTriggers(0);
@@ -73,6 +45,13 @@ TabGauche::TabGauche(QWidget *parent)
     layoutDroite->addWidget(supprTag);
     layoutDroite->addWidget(vue2);
     layoutDroite->addWidget(ajouterTag);
+
+    //----------------------------------------------------
+
+    QObject::connect(ajouterTag, SIGNAL(clicked(bool)), this, SLOT(ajouterTag()));
+    QObject::connect(vue1, SIGNAL(activated(QModelIndex)), this, SLOT(supprimerTag()));
+    QObject::connect(supprTag, SIGNAL(clicked(bool)), this, SLOT(supprimerTag()));
+    QObject::connect(vue2, SIGNAL(activated(QModelIndex)), this, SLOT(ajouterTag()));
 
     //----------------------------------------------------
     QHBoxLayout *layoutSecondaire = new QHBoxLayout;
@@ -91,45 +70,113 @@ void TabGauche::afficher(){
             "\ndate : "+file.lastModified().toString()+
             "\nSize : "+QString::number(file.size())+
             "\nType : "+file.suffix();
+    fichierCourant = file.absoluteFilePath();
     name->setText(st);
+
+    //ajouter tag st
+    QString fileName = "/home/etochy/tagFichier.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+    list1.clear();
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        QStringList l = ligne.split(";");
+        QString str1 = l.at(0);
+        if(fichierCourant == str1){
+            for(int i=1; i<l.size();++i){
+                list1.push_back(l.at(i));
+            }
+            model1->removeRows( 0, model1->rowCount() );
+        }
+    }
+    model1->setStringList(list1);
+    fichier.close();
+
+    majTagsDispo();
+
 }
+
 void TabGauche::ajouterTag(){
+    index = vue2->currentIndex();
+    QString st = list2.at(index.row());
+
+    //ajouter tag st
+
+    QStringList listTags;
+    QString fileName = "/home/etochy/tagFichier.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
+
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        listTags.push_back(ligne);
+    }
+    fichier.close();
+    // On ouvre notre fichier en lecture seule et on vérifie l'ouverture
+    if (!fichier.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    // Création d'un objet QTextStream à partir de notre objet QFile
+    QTextStream flux2(&fichier);
+    // On choisit le codec correspondant au jeu de caractère que l'on souhaite ; ici, UTF-8
+    flux2.setCodec("UTF-8");
+    // Écriture des différentes lignes dans le fichier
+    int b = 0;
+    for(int i=0; i<listTags.size();++i){
+        l.clear();
+        QStringList l2 = listTags.at(i).split(";");
+        QString str1 = l.at(0);
+        if(fichierCourant == str1){
+            flux << listTags.at(i) << ";" << st << endl;
+            b = 1;
+            l = listTags.at(i).split(";");;
+        }
+        else{
+            flux2 << listTags.at(i) << endl;
+        }
+    }
+    if(b == 0){
+        flux2 << fichierCourant << ";" << st << endl;
+    }
+    fichier.close();
+    afficher();
 
 }
 void TabGauche::supprimerTag(){
+    index = vue1->currentIndex();
+    QString st = list1.at(index.row());
 
+    //supprimer tag st de fichier courant
 }
 
-// -----------------------------------------
-
-void TabGauche::readFile(const QJsonObject &json)
-{
-    /*
-    list1.clear();
-    QJsonArray array = json["files"].toArray();
-    for (int i = 0; i < array.size(); ++i) {
-        QJsonObject object = array[i].toObject();
-        list1.push_back(object["path"]);
-    }*/
-}
-
-void TabGauche::addTagFile(QJsonObject &json, QString st)
-{
-    QJsonArray npcArray;
+void TabGauche::majTagsDispo(){
+    QString fileName = "/home/etochy/tags.txt";
+    QFile fichier(fileName);
+    fichier.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream flux(&fichier);
     list2.clear();
-    qWarning("coucou");
-
-    QJsonArray levelArray = json["tags"].toArray();
-    for (int i = 0; i < levelArray.size(); ++i) {
-        QString st = levelArray[i].toString();
-        list2.push_back(st);
-        qWarning("coucou");
+    QString ligne;
+    while(! flux.atEnd())
+    {
+        ligne = flux.readLine();
+        for(int i=1;i<l.size();++i){
+            if(l.at(i) == ligne){
+                //do nothing
+            }
+            else{
+                list2.push_back(ligne);
+            }
+        }
     }
-    for (int i = 0; i < list2.size(); ++i) {
-        npcArray.append(list2.at(i));
-        qWarning("coucou 2");
-    }
-    npcArray.append("4");
+    model2->setStringList( QStringList{} );
+    model2->setStringList(list2);
+    fichier.close();
 
-    json["tags"] = npcArray;
 }
+

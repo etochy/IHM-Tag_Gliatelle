@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
     zoneCentrale->setLayout(layoutPrincipal);
     setCentralWidget(zoneCentrale);
     setBaseSize(800,600);
-
 }
 
 MainWindow::~MainWindow()

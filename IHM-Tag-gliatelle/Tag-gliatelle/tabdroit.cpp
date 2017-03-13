@@ -10,12 +10,12 @@ TabDroit::TabDroit(QWidget *parent)
     QVBoxLayout *layoutGauche = new QVBoxLayout;
 
     QHBoxLayout *layoutRecherche = new QHBoxLayout;
-    QLineEdit *fileNameEdit = new QLineEdit("Tag 1");
+    recherche = new QLineEdit("");
     QPushButton *rechercher = new QPushButton("Rechercher");
 
     model = new QStringListModel;
 
-    list.push_back("fichier 1");
+    list.push_back("/home/etochy/");
     list.push_back("fichier 2");
     model->setStringList(list);
 
@@ -27,7 +27,7 @@ TabDroit::TabDroit(QWidget *parent)
     QObject::connect(vue, SIGNAL(clicked(QModelIndex)), this, SLOT(afficher()));
     QPushButton *ouvrir = new QPushButton("Ouvrir");
 
-    layoutRecherche->addWidget(fileNameEdit);
+    layoutRecherche->addWidget(recherche);
     layoutRecherche->addWidget(rechercher);
     layoutGauche->addLayout(layoutRecherche);
     layoutGauche->addWidget(vue);
@@ -56,10 +56,22 @@ TabDroit::TabDroit(QWidget *parent)
     QPushButton *supprTag = new QPushButton("Supprimer Tag");
 
     layoutDroit->addWidget(name);
+    QLabel *name1 = new QLabel("Tag presents : ");
+    layoutDroit->addWidget(name1);
     layoutDroit->addWidget(vue1);
     layoutDroit->addWidget(supprTag);
+    QLabel *name2 = new QLabel("Tag disponibles : ");
+    layoutDroit->addWidget(name2);
     layoutDroit->addWidget(vue2);
     layoutDroit->addWidget(ajouterTag);
+    //----------------
+
+    QObject::connect(ajouterTag, SIGNAL(clicked(bool)), this, SLOT(ajouterTag()));
+    QObject::connect(vue1, SIGNAL(activated(QModelIndex)), this, SLOT(supprimerTag()));
+    QObject::connect(supprTag, SIGNAL(clicked(bool)), this, SLOT(supprimerTag()));
+    QObject::connect(vue2, SIGNAL(activated(QModelIndex)), this, SLOT(ajouterTag()));
+    QObject::connect(rechercher, SIGNAL(clicked(bool)), this, SLOT(rechercher()));
+    QObject::connect(ouvrir, SIGNAL(clicked(bool)), this, SLOT(ouvrir()));
     //----------------
     layoutPrincipal->addLayout(layoutGauche);
     layoutPrincipal->addLayout(layoutDroit);
@@ -69,13 +81,34 @@ TabDroit::TabDroit(QWidget *parent)
 void TabDroit::afficher(){
 
     index = vue->currentIndex();
-    QString st = list.at(index.row());
+    fichierCourant = list.at(index.row());
 
-    name->setText(st);
+    name->setText(fichierCourant);
+    //afficher tag dans vue1
 }
 void TabDroit::ajouterTag(){
+    index = vue2->currentIndex();
+    QString st = list2.at(index.row());
 
+    //ajouter tag st
 }
 void TabDroit::supprimerTag(){
+    index = vue1->currentIndex();
+    QString st = list1.at(index.row());
 
+    //supprimer tag st de fichier courant
+}
+void TabDroit::rechercher(){
+    QString st = recherche->text();
+
+    //rechercher correspondance
+}
+
+void TabDroit::ouvrir(){
+    if(fichierCourant == ""){
+        QMessageBox::information(this, "Erreur", "Aucun fichier n'a été séléctionné");
+    }
+    else{
+        QDesktopServices::openUrl(fichierCourant);
+    }
 }

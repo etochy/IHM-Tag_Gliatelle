@@ -42,6 +42,7 @@ private:
     QModelIndex index;
     QDirModel *model;
     QTreeView *tree = new QTreeView();
+    QString fichierCourant;
 
     QStringListModel *model1;
     QListView *vue1;
@@ -50,10 +51,8 @@ private:
     QStringListModel *model2;
     QListView *vue2;
     QStringList list2;
-
-    void readFile(const QJsonObject &json);
-    void addTagFile(QJsonObject &json,QString st);
-
+    QStringList l;
+    void majTagsDispo();
 private slots:
     void afficher();
     void ajouterTag();
@@ -72,6 +71,8 @@ private:
     QStringList list;
     QLabel *name = new QLabel("");
 
+    QString fichierCourant;
+
     QStringListModel *model1;
     QListView *vue1;
     QStringList list1;
@@ -80,12 +81,14 @@ private:
     QListView *vue2;
     QStringList list2;
 
+    QLineEdit *recherche;
+
 private slots:
     void afficher();
     void ajouterTag();
     void supprimerTag();
-
-
+    void rechercher();
+    void ouvrir();
 };
 
 #endif // MAINWINDOW_H
